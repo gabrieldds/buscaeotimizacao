@@ -1,0 +1,3 @@
+from popalgorithms.individualclass import Individual
+from popalgorithms.populationclass import Population
+from popalgorithms.population_methods import PopulationMethods
