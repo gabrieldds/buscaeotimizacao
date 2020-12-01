@@ -17,7 +17,7 @@ class Individual:
         self.fbias = fbias
         self.fitness = 0.0
 
-    def mutation(self):
+    def mutation(self, p=1.0, r=0.01):
         self.values = boundedUniformConvolution(solution=self.values, p=1.0, r=0.01, min=self.min_v, max=self.max_v)
 
     def generate(self):

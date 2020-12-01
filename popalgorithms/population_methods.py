@@ -47,7 +47,7 @@ class PopulationMethods:
         
         return best.values
 
-    def genetic_algorithm_elitism(self, pop_size: int, n: int) -> Individual:
+    def genetic_algorithm_elitism(self, pop_size: int, n: int, p: float, r: float) -> Individual:
         population = Population(set())
         for _ in range(pop_size):
             individual = Individual(func_optmized=self.func_optmized, dim=self.dim, min_v=self.min_v, 
@@ -72,8 +72,8 @@ class PopulationMethods:
                 childrenA, childrenB = population.two_point_crossover(deepcopy(parentA), deepcopy(parentB))
                 childrenA.assess_fitness()
                 childrenB.assess_fitness()
-                childrenA.mutation()
-                childrenB.mutation()
+                childrenA.mutation(p, r)
+                childrenB.mutation(p, r)
                 q.data.add(childrenA)
                 q.data.add(childrenB)
             
@@ -83,7 +83,7 @@ class PopulationMethods:
 
         return best.values
     
-    def differencial_evolution(self, gama: float, pop_size: int) -> Individual:
+    def differencial_evolution(self, gama: float, pop_size: int, p: float, r: float) -> Individual:
         population = Population(np.array([]))
         Q = Population(np.array([]))
         for _ in range(pop_size):
@@ -107,7 +107,7 @@ class PopulationMethods:
             for j in range(len(Q.data)):
                 copy_q = deepcopy(Q)
                 indexes = [index for index in range(len(Q.data)) if j != index]
-                vector_a, vector_b, vector_c = copy_q.data[np.random.choice(indexes, 3, replace = False)]
+                vector_a, vector_b, vector_c = copy_q.data[np.random.choice(indexes, 3, replace = True)]
                 vector_d = Individual(func_optmized=self.func_optmized, dim=self.dim, min_v=self.min_v, 
                     max_v=self.max_v, os=self.os, fbias=self.fbias)
                 vector_d.values = np.clip(vector_a.values + gama * (vector_b.values - vector_c.values),
@@ -118,8 +118,11 @@ class PopulationMethods:
             iteration += 1
 
         return best.values
+    
+    def solution(self, s):
+        return self.func_optmized(s, self.os, self.fbias)
         
-    def exec(self, algo='', number_of_executions=10, u=2, v=4, pop_size = 8, n = 4, gama = 0.995):
+    def exec(self, algo='', number_of_executions=10, u=2, v=4, pop_size = 8, n = 4, gama = 0.995, p=1.0, r=0.125):
         result = []
         if(algo == 'uv_evolution'):
             for _ in range(number_of_executions):
@@ -129,13 +132,13 @@ class PopulationMethods:
             return result
         elif algo == 'genetic_algorithm_elitism':
             for _ in range(number_of_executions):
-                solution = self.genetic_algorithm_elitism(pop_size, n)
+                solution = self.genetic_algorithm_elitism(pop_size, n, p, r)
                 best   = self.func_optmized(solution, self.os, self.fbias)
                 result.append(best)
             return result
         elif algo == 'differencial_evolution':
             for _ in range(number_of_executions):
-                solution = self.differencial_evolution(gama, pop_size)
+                solution = self.differencial_evolution(gama, pop_size, p, r)
                 best   = self.func_optmized(solution, self.os, self.fbias)
                 result.append(best)
             return result
